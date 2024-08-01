@@ -5,6 +5,7 @@ import re
 from datetime import datetime
 from pymongo import MongoClient
 from bson.json_util import dumps
+from urllib.parse import quote_plus
 
 # Function to generate filename with date
 def generate_filename(metal_type):
@@ -52,10 +53,20 @@ def table_to_json(table_data, metal_type):
 
 # Function to upload data to MongoDB Atlas
 def upload_to_mongodb(json_data, metal_type):
-    # Replace with your MongoDB Atlas connection string
-    mongo_uri = "mongodb+srv://technoresult:Domain@202!@goldcalculator-01.lfvxjyn.mongodb.net/?retryWrites=true&w=majority&appName=GoldCalculator-01"
+    # Replace with your MongoDB Atlas connection details
+    username = "technoresult"
+    password = "Domain@202!"  # Replace with your actual password
+    cluster = "goldcalculator-01.lfvxjyn.mongodb.net"
+    
+    # Escape username and password
+    escaped_username = quote_plus(username)
+    escaped_password = quote_plus(password)
+    
+    # Construct the connection string
+    mongo_uri = f"mongodb+srv://{escaped_username}:{escaped_password}@{cluster}/?retryWrites=true&w=majority&appName=GoldCalculator-01"
+    
     client = MongoClient(mongo_uri)
-    db = client["GoldCalculator-01"]
+    db = client["your_database_name"]  # Replace with your actual database name
     collection = db[f"{metal_type.lower()}_prices"]
 
     # Add a timestamp to the document
