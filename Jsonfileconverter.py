@@ -50,6 +50,10 @@ def table_to_json(table_data, metal_type):
                 st.warning(f"Skipping invalid data for city: {city}, prices: {price_10g}, {price_100g}, {price_1kg}")
         
         return {"silver_rates": silver_rates}
+# Generate File name
+def generate_filename(metal_type):
+    today = datetime.now().strftime("%Y-%m-%d")
+    return f"{metal_type[0].upper()}_{today}.json"
 
 # Function to upload data to MongoDB Atlas
 def upload_to_mongodb(json_data, metal_type):
@@ -66,14 +70,21 @@ def upload_to_mongodb(json_data, metal_type):
     mongo_uri = f"mongodb+srv://{escaped_username}:{escaped_password}@{cluster}/?retryWrites=true&w=majority&appName=GoldCalculator-01"
     
     client = MongoClient(mongo_uri)
-    db = client["your_database_name"]  # Replace with your actual database name
+    db = client["your_database_name"]
     collection = db[f"{metal_type.lower()}_prices"]
 
-    # Add a timestamp to the document
-    json_data["timestamp"] = datetime.utcnow()
+    # Generate filename
+    filename = generate_filename(metal_type)
+
+    # Add filename and timestamp to the document
+    document = {
+        "filename": filename,
+        "data": json_data,
+        "timestamp": datetime.utcnow()
+    }
 
     # Insert the document
-    result = collection.insert_one(json_data)
+    result = collection.insert_one(document)
     return result.inserted_id
 
 # Streamlit app
